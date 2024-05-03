@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from typing import Type
 
+from cs336_systems.triton_rmsnorm import *
+
 import torch
 
 
@@ -16,8 +18,7 @@ def get_rmsnorm_autograd_function_pytorch() -> Type:
         A class object (not an instance of the class)
     """
     # For example: return MyRMSNormAutogradFunctionClass
-    raise NotImplementedError
-
+    return PytorchRMSNorm
 
 def get_rmsnorm_autograd_function_triton() -> Type:
     """
@@ -32,7 +33,7 @@ def get_rmsnorm_autograd_function_triton() -> Type:
         A class object (not an instance of the class)
     """
     # For example: return MyTritonRMSNormAutogradFunctionClass
-    raise NotImplementedError
+    return TritonRMSNormKernel
 
 
 def rmsnorm_backward_g_pytorch(
@@ -53,7 +54,9 @@ def rmsnorm_backward_g_pytorch(
     Returns:
         Gradient of the loss with respect to g. Shape: (H,)
     """
-    raise NotImplementedError
+    output = PytorchRMSNorm.jvp_g(grad_output, x, g, epsilon=1e-5)
+    
+    return output
 
 
 def rmsnorm_backward_x_pytorch(
@@ -74,7 +77,9 @@ def rmsnorm_backward_x_pytorch(
     Returns:
         Gradient of the loss with respect to x. Shape: (*, H)
     """
-    raise NotImplementedError
+    output = PytorchRMSNorm.jvp_x(grad_output, x, g, epsilon=1e-5)
+    
+    return output
 
 
 def get_ddp_individual_parameters(module: torch.nn.Module) -> torch.nn.Module:

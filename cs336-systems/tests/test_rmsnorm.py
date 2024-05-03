@@ -29,8 +29,10 @@ def _make_rmsnorm_inputs(device=None):
 def _test_rmsnorm_forward_pass(impl, device="cpu"):
     x, g, dy = _make_rmsnorm_inputs(device)
     y = impl(x, g)
+    print(y.shape)
     y_ref = _rmsnorm(x, g)
-
+    print(y_ref.shape)
+    
     assert torch.allclose(y, y_ref, rtol=1e-4, atol=1e-5), (y, y_ref)
 
 

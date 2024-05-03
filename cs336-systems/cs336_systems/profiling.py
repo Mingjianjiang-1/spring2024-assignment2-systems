@@ -9,11 +9,11 @@ from torch.profiler import profile, record_function, ProfilerActivity
 
 
 # Setup logging
-logging.basicConfig(level=logging.INFO, format='%(message)s', filemode='w', filename='profiling.log')
+# logging.basicConfig(level=logging.INFO, format='%(message)s', handlers=[logging.StreamHandler()])
 
 def run_step(model, inputs, optimizer, enable_backward, vocab_size=10000):
 	with record_function('forward_pass'):
-		model.forward(inputs, ...)
+		model.forward(inputs)
 
 	if enable_backward:
 		with record_function('backward_pass'):
@@ -66,7 +66,7 @@ def _profile(config):
         with_stack=True,
     ) as prof:
         for _ in range(config['num_trials']):
-            run_step(model, ...)
+            run_step(model, data, optimizer, config['include_backward'], vocab_size=vocab_size)
             prof.step()
 
     prof.export_stacks("lm_profiler_stacks.txt", "self_cuda_time_total")
@@ -89,5 +89,10 @@ def run_experiments(include_backward):
     
 
 if __name__ == "__main__":
-    run_experiments(include_backward=False)
+    include_backward = False
+    suffix = ''
+    if include_backward:
+        suffix = '_with_backward'
+    logging.basicConfig(level=logging.INFO, format='%(message)s', handlers=[logging.FileHandler(f'profiling{suffix}.log'), logging.StreamHandler()])
+    run_experiments(include_backward=include_backward)
     # run_experiments(include_backward=True)
